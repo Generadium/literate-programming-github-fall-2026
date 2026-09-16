@@ -35,34 +35,34 @@
 # Specification
 # -------------
 #
-# truncate(s, max_length=100) shortens a string only when its trailing-stripped
-# form is longer than max_length.
+# `truncate(s, max_length=100)` shortens a string only when its trailing-stripped
+# form is longer than `max_length`.
 #
 # Ordered rules:
 #
-# 1. s must be a str or None.
-# 2. If s is None, return None.
-# 3. max_length must be an int greater than or equal to 1.
-# 4. Apply rstrip() to s. This removes all trailing whitespace, including an
+# 1. `s` must be a `str` or `None`.
+# 2. If `s` is `None`, return `None`.
+# 3. `max_length` must be an `int` greater than or equal to `1`.
+# 4. Apply `rstrip()` to `s`. This removes all trailing whitespace, including an
 #    all-whitespace input. Leading and internal whitespace are otherwise kept.
-# 5. If the trailing-stripped string is empty, return "".
-# 6. If len(s) <= max_length, return the trailing-stripped string unchanged.
+# 5. If the trailing-stripped string is empty, return `""`.
+# 6. If `len(s) <= max_length`, return the trailing-stripped string unchanged.
 #    Do not append an ellipsis because no content was removed.
-# 7. If len(s) > max_length, begin with s[:max_length].
-# 8. The cut is in the middle of a word when s[max_length - 1] and
-#    s[max_length] are both non-whitespace according to str.isspace().
-# 9. When the cut is in the middle of a word, search s[:max_length] backward
-#    for the last whitespace character at index i. If one exists, use s[:i].
+# 7. If `len(s) > max_length`, begin with `s[:max_length]`.
+# 8. The cut is in the middle of a word when `s[max_length - 1]` and
+#    `s[max_length]` are both non-whitespace according to `str.isspace()`.
+# 9. When the cut is in the middle of a word, search `s[:max_length]` backward
+#    for the last whitespace character at index `i`. If one exists, use `s[:i]`.
 #    There is no minimum backup distance; avoiding a split word takes priority.
 # 10. If backing up would leave no non-whitespace text, fall back to the hard
-#     cut s[:max_length] rather than returning a bare ellipsis.
-# 11. Remove trailing whitespace from the shortened text with rstrip().
-# 12. Append exactly one Unicode ellipsis character, U+2026 ("…").
-# 13. A truncated result contains at most max_length characters of retained text
+#     cut `s[:max_length]` rather than returning a bare ellipsis.
+# 11. Remove trailing whitespace from the shortened text with `rstrip()`.
+# 12. Append exactly one Unicode ellipsis character, U+2026 (`"…"`).
+# 13. A truncated result contains at most `max_length` characters of retained text
 #     followed by the ellipsis.
 # 14. Word boundaries are whitespace only. Hyphens, dashes, zero-width spaces,
 #     URLs, and scripts without whitespace do not create additional boundaries.
-# 15. Python len() defines character count. A hard cut may therefore split a
+# 15. Python `len()` defines character count. A hard cut may therefore split a
 #     grapheme cluster; no Unicode normalization is performed.
 #
 # 
