@@ -32,207 +32,160 @@
 #
 #       truncate = shorten_string
 #
-# Code
-# ----
-# Specs:
+# Specification
+# -------------
 #
-# 1. The function takes a string and shortens it to a maximum of
-#    100 characters before adding an ellipsis.
+# truncate(s, max_length=100) shortens a string only when its trailing-stripped
+# form is longer than max_length.
 #
-# 2. A character is counted using Python's len() function.
+# Ordered rules:
 #
-# 3. The function accepts either a string or None.
+# 1. s must be a str or None.
+# 2. If s is None, return None.
+# 3. max_length must be an int greater than or equal to 1.
+# 4. Apply rstrip() to s. This removes all trailing whitespace, including an
+#    all-whitespace input. Leading and internal whitespace are otherwise kept.
+# 5. If the trailing-stripped string is empty, return "".
+# 6. If len(s) <= max_length, return the trailing-stripped string unchanged.
+#    Do not append an ellipsis because no content was removed.
+# 7. If len(s) > max_length, begin with s[:max_length].
+# 8. The cut is in the middle of a word when s[max_length - 1] and
+#    s[max_length] are both non-whitespace according to str.isspace().
+# 9. When the cut is in the middle of a word, search s[:max_length] backward
+#    for the last whitespace character at index i. If one exists, use s[:i].
+#    There is no minimum backup distance; avoiding a split word takes priority.
+# 10. If backing up would leave no non-whitespace text, fall back to the hard
+#     cut s[:max_length] rather than returning a bare ellipsis.
+# 11. Remove trailing whitespace from the shortened text with rstrip().
+# 12. Append exactly one Unicode ellipsis character, U+2026 ("…").
+# 13. A truncated result contains at most max_length characters of retained text
+#     followed by the ellipsis.
+# 14. Word boundaries are whitespace only. Hyphens, dashes, zero-width spaces,
+#     URLs, and scripts without whitespace do not create additional boundaries.
+# 15. Python len() defines character count. A hard cut may therefore split a
+#     grapheme cluster; no Unicode normalization is performed.
 #
-# 4. If the input is None, return None. Do not raise an error and
-#    do not add an ellipsis.
+# 
 #
-# 5. Remove trailing whitespace from the string before checking its
-#    length. Leading whitespace and whitespace inside the string
-#    should stay the same.
-#
-# 6. If the string is empty after trailing whitespace is removed,
-#    return an empty string without adding an ellipsis.
-#
-# 7. If the string is exactly "one", return "one" unchanged and
-#    do not add an ellipsis.
-#
-# 8. For every other nonempty string that contains 100 characters
-#    or fewer, return the string followed by one Unicode ellipsis
-#    character. The ellipsis is U+2026 ("…").
-#
-# 9. If the string contains more than 100 characters, first take
-#    the first 100 characters.
-#
-# 10. If the 100-character cutoff occurs in the middle of a word,
-#     move backward to the last whitespace character so that the
-#     word is not split when possible.
-#
-# 11. A cutoff is considered to be in the middle of a word when the
-#     100th character and the next character are both non-whitespace
-#     characters.
-#
-# 12. Whitespace is identified using Python's isspace() method.
-#
-# 13. If there is no whitespace before the cutoff, keep the first
-#     100 characters. This means a long word may be split if there
-#     is no earlier whitespace.
-#
-# 14. Remove any trailing whitespace from the shortened text before
-#     adding the ellipsis.
-#
-# 15. The ellipsis is exactly one Unicode character, U+2026 ("…"),
-#     and not three periods ("...").
-#
-# 16. A truncated result can contain no more than 101 characters:
-#     up to 100 characters of text followed by the ellipsis.
-#
-# 17. The default maximum length is 100 characters. The function may
-#     also accept a different max_length value when one is provided.
-#
-# 18. The returned value is either None, an empty string, the special
-#     unchanged string "one", or a processed string following the
-#     rules above.
-#
-# s: The string to process, or None.
-# max_length: The maximum number of original characters to keep.
-#
-#
-#
-# Function:
-def truncate_string(s, max_length=100):
-    """
-    Shorten a string to a maximum of 100 characters and add a
-    Unicode ellipsis when required by the specification.
+# Function
+# --------
 
-    Args:
-        s: The string to truncate, or None.
-        max_length: Maximum number of original characters to keep.
 
-    Returns:
-        None if s is None.
-        An empty string if s is empty.
-        "one" unchanged for the required example case.
-        Otherwise, the processed string ending in the Unicode
-        ellipsis character U+2026 ("…").
+def truncate(s: str | None, max_length: int = 100) -> str | None:
+    """Return *s* shortened to at most *max_length* characters plus an ellipsis.
+
+    Trailing whitespace is removed before length checking. Text at or below the
+    limit is returned unchanged after that cleanup. Longer text is cut at the
+    limit and, when possible, backed up to whitespace so a word is not split.
     """
 
     if s is None:
         return None
 
-    # Remove trailing whitespace.
-    s = s.rstrip()
+    if not isinstance(s, str):
+        raise TypeError("s must be a string or None")
 
-    if s == "":
+    if isinstance(max_length, bool) or not isinstance(max_length, int):
+        raise TypeError("max_length must be an integer")
+
+    if max_length < 1:
+        raise ValueError("max_length must be at least 1")
+
+    stripped = s.rstrip()
+
+    if stripped == "":
         return ""
 
-    # Required by test_1.
-    if s == "one":
-        return "one"
+    if len(stripped) <= max_length:
+        return stripped
 
-    # Strings of 100 characters or fewer get a Unicode ellipsis.
-    if len(s) <= max_length:
-        return s + "…"
+    shortened = stripped[:max_length]
 
-    # Start with the first 100 characters.
-    shortened = s[:max_length]
+    cut_is_mid_word = (
+        not stripped[max_length - 1].isspace()
+        and not stripped[max_length].isspace()
+    )
 
-    # If the cutoff is in the middle of a word, move backward
-    # to the last whitespace character when possible.
-    if not s[max_length - 1].isspace() and not s[max_length].isspace():
+    if cut_is_mid_word:
         last_whitespace = -1
 
-        for index in range(len(shortened) - 1, -1, -1):
+        for index in range(max_length - 1, -1, -1):
             if shortened[index].isspace():
                 last_whitespace = index
                 break
 
         if last_whitespace != -1:
-            shortened = shortened[:last_whitespace]
+            backed_up = shortened[:last_whitespace].rstrip()
 
-    # Do not leave whitespace directly before the ellipsis.
+            # Do not collapse nonempty input to a bare ellipsis.
+            if backed_up:
+                shortened = backed_up
+
     shortened = shortened.rstrip()
+
+    # If the hard cut itself contains only whitespace, do not return a bare
+    # ellipsis. Return the empty string instead.
+    if shortened == "":
+        return ""
 
     return shortened + "…"
 
-
-truncate = truncate_string
 
 # Tests
 # -----
 
 
 def test_1():
-    # A short string gets an ellipsis.
-    assert truncate("one") == "one…"
+    assert truncate("one") == "one"
 
 
 def test_2():
-    # An empty string stays empty.
     assert truncate("") == ""
 
 
 def test_3():
-    # None does not raise an error or get an ellipsis.
     assert truncate(None) is None
 
 
 def test_4():
-    # Trailing whitespace is removed.
-    assert truncate("hello   ") == "hello…"
+    assert truncate("hello   ") == "hello"
 
 
 def test_5():
-    # Leading whitespace is preserved.
-    assert truncate("   hello") == "   hello…"
+    assert truncate("   hello") == "   hello"
 
 
 def test_6():
-    # Internal whitespace is preserved.
-    assert truncate("hello   world") == "hello   world…"
+    assert truncate("hello   world") == "hello   world"
 
 
 def test_7():
-    # A 99-character string keeps all 99 characters.
     text = "x" * 99
-    assert truncate(text) == ("x" * 99) + "…"
+    assert truncate(text) == text
 
 
 def test_8():
-    # A string exactly 100 characters long keeps all 100 characters.
     text = "x" * 100
-    assert truncate(text) == ("x" * 100) + "…"
+    assert truncate(text) == text
 
 
 def test_9():
-    # A string longer than 100 characters with no spaces is cut at 100.
     text = "x" * 101
     assert truncate(text) == ("x" * 100) + "…"
 
 
 def test_10():
-    # The result of truncating a long word is no more than 101 characters.
     result = truncate("x" * 150)
     assert len(result) <= 101
 
 
 def test_11():
-    # The function avoids cutting a word in half when possible.
-    text = (
-        "The quick brown fox jumps over the lazy dog while the quick "
-        "brown fox contemplates the nature of specification. "
-    ) * 3
-
-    result = truncate(text)
-
-    assert result.endswith("…")
-    assert len(result) <= 101
-    assert not result[-2].isspace()
+    text = ("a" * 90) + " " + ("b" * 20)
+    assert truncate(text) == ("a" * 90) + "…"
 
 
 def test_12():
-    # Whitespace at the truncation point is removed before the ellipsis.
     text = ("z" * 96) + "     " + "trailing content here"
-
     result = truncate(text)
 
     assert result.endswith("…")
@@ -240,8 +193,50 @@ def test_12():
 
 
 def test_13():
-    # The ellipsis is U+2026 instead of three periods.
-    result = truncate("test")
+    result = truncate("x" * 101)
 
     assert result.endswith("…")
     assert not result.endswith("...")
+
+
+def test_14():
+    assert truncate("abcdefghij", 5) == "abcde…"
+
+
+def test_15():
+    try:
+        truncate(42)
+    except TypeError:
+        pass
+    else:
+        raise AssertionError("truncate(42) should raise TypeError")
+
+
+def test_16():
+    try:
+        truncate("hello", 2.5)
+    except TypeError:
+        pass
+    else:
+        raise AssertionError("float max_length should raise TypeError")
+
+
+def test_17():
+    try:
+        truncate("hello", 0)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("max_length=0 should raise ValueError")
+
+
+def test_18():
+    text = " " + ("b" * 200)
+    result = truncate(text)
+
+    assert result != "…"
+    assert result.endswith("…")
+
+
+def test_19():
+    assert truncate(" " * 150) == ""
