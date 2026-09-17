@@ -34,6 +34,10 @@
 #
 # Code
 # ----
+# 8. An empty input is treated like any other input containing fewer than 
+#    100 grapheme clusters and therefore returns the ellipsis alone.
+
+import regex
 # Write a Python function named "truncate" that truncates a string to a maximum of 100 characters 
 # and adds a Unicode ellipsis, adhering to the following rules. Use the third-party 
 # Python package regex and its \X pattern to identify Unicode grapheme clusters.
@@ -48,10 +52,6 @@
 #    99 grapheme clusters of the input and then append the ellipsis.
 # 7. If the stripped input contains fewer than 100 grapheme clusters, return the entire stripped input
 #    followed by the ellipsis, even if the resulting string is shorter than 100 grapheme clusters.
-# 8. An empty input is treated like any other input containing fewer than 
-#    100 grapheme clusters and therefore returns the ellipsis alone.
-
-import regex
 
 # text: the input string to truncate
 # return: the input string with trailing whitespace removed and a Unicode ellipsis appended,
