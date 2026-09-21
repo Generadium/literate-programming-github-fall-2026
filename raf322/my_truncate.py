@@ -35,41 +35,41 @@
 # Code
 # ----
 
-#Write a truncator function (named "truncate") that takes a string as an input and
-#adheres to the following guidelines. Note that the maximum length specified in this case is
-#100 characters.
+# Write a truncator function (named "truncate") that takes a string as an input and
+# adheres to the following guidelines. Note that the maximum length specified in this case is
+# 100 characters.
 
-#1. A character is defined as one Unicode code point. Letters, numbers, spaces, tabs, newline characters, and other whitespace each count as characters.
+# 1. A character is defined as one Unicode code point. Letters, numbers, spaces, tabs, newline characters, and other whitespace each count as characters.
 
-#2. Whitespace includes spaces, tabs, and newline characters, and any of these may serve as a word boundary. 
+# 2. Whitespace includes spaces, tabs, and newline characters, and any of these may serve as a word boundary. 
 # Leading and internal whitespace are preserved and count toward the character limit. Trailing whitespace is omitted, even if the string is within the maximum length.
 
-#3.An ellipsis is a single Unicode character ("…").
+# 3.An ellipsis is a single Unicode character ("…").
 
-#4. An ellipsis should not be added to the middle of a word. If a word is caught in the middle of the character limit,
+# 4. An ellipsis should not be added to the middle of a word. If a word is caught in the middle of the character limit,
 # then the entire word should be omitted with the ellipsis trailing the previous complete word.
 
-#5. Strings shorter than or equal to 100 characters should not have an ellipsis.
+# 5. Strings shorter than or equal to 100 characters should not have an ellipsis.
 
-#6. When truncation occurs, the resulting length is the length of the retained portion of the string plus one character for the ellipsis. 
+# 6. When truncation occurs, the resulting length is the length of the retained portion of the string plus one character for the ellipsis. 
 # The complete result, including the ellipsis, must not exceed 100 characters.
 
-#7. If a string is empty, there is no ellipsis placed and the string remains empty.
+# 7. If a string is empty, there is no ellipsis placed and the string remains empty.
 
-#8. The ellipsis backs up to a word boundary and does not cut the string off mid-word. The only situation in which an ellipsis can
+# 8. The ellipsis backs up to a word boundary and does not cut the string off mid-word. The only situation in which an ellipsis can
 # cut a word is if the word itself exceeds the maximum length. In this case, the word is cut at the 99th character and the ellipsis is 
 # appended at the 100th character position
 
-#9. If the input is not a string, including None, the function raises a TypeError.
+# 9. If the input is not a string, including None, the function raises a TypeError.
 
 
-#Fingerprint: 3cef2b4f
+# Fingerprint: 3cef2b4f
 
 
-#Parameters:
+# Parameters:
 #   text - The input string itself.
 
-#Return - The input string. If the string's length is greater than the max_length specified then the 
+# Return - The input string. If the string's length is greater than the max_length specified then the 
 #   string will be truncated.
 
 def truncate(text):
